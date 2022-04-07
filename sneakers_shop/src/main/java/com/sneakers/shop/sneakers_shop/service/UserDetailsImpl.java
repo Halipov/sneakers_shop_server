@@ -11,30 +11,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sneakers.shop.sneakers_shop.models.User;
+import com.sneakers.shop.sneakers_shop.models.UserInfo;
 
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 
     private Long id;
     private String username;
-    private String firstName;
-    private String lastName;
-    private String phone;
+    private UserInfo userInfo;
 
     @JsonIgnore
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String username, String password, String firstName,
-            String lastName, String phone,
+    public UserDetailsImpl(Long id, String username, String password, UserInfo userInfo,
             Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phone = phone;
+        this.userInfo = userInfo;
         this.authorities = authorities;
     }
 
@@ -47,9 +43,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getId(),
                 user.getUsername(),
                 user.getPassword(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getPhone(),
+                user.getUserInfo(),
                 authorities);
     }
 
@@ -102,15 +96,8 @@ public class UserDetailsImpl implements UserDetails {
         return Objects.equals(id, user.id);
     }
 
-    public String getFirstName() {
-        return firstName;
+    public UserInfo getUserInfo() {
+        return userInfo;
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
 }

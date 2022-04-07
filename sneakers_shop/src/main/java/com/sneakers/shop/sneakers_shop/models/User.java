@@ -1,6 +1,10 @@
 package com.sneakers.shop.sneakers_shop.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +22,7 @@ import java.util.Set;
 @EqualsAndHashCode
 @NoArgsConstructor
 @Entity
-@Table(uniqueConstraints = {
+@Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "username"),
 })
 public class User {
@@ -37,21 +41,19 @@ public class User {
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    private String firstName;
-    private String lastName;
-    private String phone;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "userInfo_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private UserInfo userInfo;
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
-    public User(String username, String password, String firstName, String lastName,
-            String phone) {
+    public User(String username, String password, UserInfo userInfo) {
         this.username = username;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phone = phone;
+        this.userInfo = userInfo;
     }
 }
