@@ -15,6 +15,7 @@ import com.sneakers.shop.sneakers_shop.payload.request.SignupRequest;
 import com.sneakers.shop.sneakers_shop.payload.response.JwtResponse;
 import com.sneakers.shop.sneakers_shop.payload.response.MessageResponse;
 import com.sneakers.shop.sneakers_shop.repo.RoleRepository;
+import com.sneakers.shop.sneakers_shop.repo.UserInfoRepository;
 import com.sneakers.shop.sneakers_shop.repo.UserRepository;
 import com.sneakers.shop.sneakers_shop.sequrity.jwt.JwtUtils;
 import com.sneakers.shop.sneakers_shop.service.UserDetailsImpl;
@@ -42,6 +43,9 @@ public class AuthenticationController {
     UserRepository userRepository;
 
     @Autowired
+    UserInfoRepository userInfoRepository;
+
+    @Autowired
     RoleRepository roleRepository;
 
     @Autowired
@@ -67,6 +71,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),
+                userDetails.getUserInfo(),
                 roles));
     }
 
@@ -77,11 +82,10 @@ public class AuthenticationController {
                     .badRequest()
                     .body(new MessageResponse("Error: Username is already taken!"));
         }
-
+        userInfoRepository.save(signUpRequest.getUserInfo());
         // Create new user's account
         User user = new User(signUpRequest.getUsername(),
-
-                encoder.encode(signUpRequest.getPassword()));
+                encoder.encode(signUpRequest.getPassword()), signUpRequest.getUserInfo());
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
@@ -103,7 +107,6 @@ public class AuthenticationController {
                 }
             });
         }
-
         user.setRoles(roles);
         userRepository.save(user);
 
