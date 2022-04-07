@@ -30,7 +30,9 @@ public class ProductController {
     public ResponseEntity<List<Product>> getAllProducts() {
         try {
             List<Product> products = new ArrayList<Product>();
-            products.addAll(productRepo.findAll());
+            productRepo.findUniqueArticle();
+
+            products.addAll(productRepo.findUniqueArticle());
             return new ResponseEntity<>(products, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

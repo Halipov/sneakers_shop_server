@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sneakers.shop.sneakers_shop.models.Product;
 import com.sneakers.shop.sneakers_shop.models.Role;
 import com.sneakers.shop.sneakers_shop.models.User;
 import com.sneakers.shop.sneakers_shop.models.UserInfo;
 import com.sneakers.shop.sneakers_shop.models.UserRole;
+import com.sneakers.shop.sneakers_shop.repo.ProductRepository;
 import com.sneakers.shop.sneakers_shop.repo.RoleRepository;
 import com.sneakers.shop.sneakers_shop.repo.UserInfoRepository;
 import com.sneakers.shop.sneakers_shop.repo.UserRepository;
@@ -32,6 +34,9 @@ public class UserController {
     @Autowired
     UserInfoRepository userInfoRepository;
 
+    @Autowired
+    ProductRepository productRepo;
+
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUser() {
         try {
@@ -53,6 +58,43 @@ public class UserController {
 
         return userData.map(user -> new ResponseEntity<>(user, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @PutMapping("/userInfo/{id}")
+    public ResponseEntity<UserInfo> updateUserInfo(@PathVariable("id") long id, @RequestBody UserInfo userInfo) {
+        Optional<UserInfo> userData = userInfoRepository.findById(id);
+
+        if (userData.isPresent()) {
+            return new ResponseEntity<>(userInfoRepository.save(userInfo), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/addFavorite/{id}")
+    public ResponseEntity<List<Product>> addFavorite(@PathVariable("id") long id, @RequestBody Product product) {
+        Optional<UserInfo> userData = userInfoRepository.findById(id);
+        if (userData.isPresent()) {
+            Optional<Product> _product = productRepo.findById(product.getId());
+            UserInfo userInfo = userData.get();
+            if (_product.isPresent()) {
+                Product productTemp = _product.get();
+                if (userInfo.getProduct().contains(productTemp)) {
+                    userInfo.getProduct().remove(productTemp);
+                } else {
+                    userInfo.getProduct().add(productTemp);
+                }
+                userInfoRepository.save(userInfo);
+            } else {
+                return new ResponseEntity<>(userInfo.getProduct(), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(userInfo.getProduct(), HttpStatus.OK);
+
+        } else
+
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/user")

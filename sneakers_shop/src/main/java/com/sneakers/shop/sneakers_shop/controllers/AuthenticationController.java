@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.sneakers.shop.sneakers_shop.models.Cart;
 import com.sneakers.shop.sneakers_shop.models.Role;
 import com.sneakers.shop.sneakers_shop.models.User;
 import com.sneakers.shop.sneakers_shop.models.UserRole;
@@ -14,6 +15,7 @@ import com.sneakers.shop.sneakers_shop.payload.request.LoginRequest;
 import com.sneakers.shop.sneakers_shop.payload.request.SignupRequest;
 import com.sneakers.shop.sneakers_shop.payload.response.JwtResponse;
 import com.sneakers.shop.sneakers_shop.payload.response.MessageResponse;
+import com.sneakers.shop.sneakers_shop.repo.CartRepository;
 import com.sneakers.shop.sneakers_shop.repo.RoleRepository;
 import com.sneakers.shop.sneakers_shop.repo.UserInfoRepository;
 import com.sneakers.shop.sneakers_shop.repo.UserRepository;
@@ -49,6 +51,9 @@ public class AuthenticationController {
     RoleRepository roleRepository;
 
     @Autowired
+    CartRepository cartRepository;
+
+    @Autowired
     PasswordEncoder encoder;
 
     @Autowired
@@ -82,6 +87,9 @@ public class AuthenticationController {
                     .badRequest()
                     .body(new MessageResponse("Error: Username is already taken!"));
         }
+        Cart cart = new Cart();
+        cartRepository.save(cart);
+        signUpRequest.getUserInfo().setCart(cart);
         userInfoRepository.save(signUpRequest.getUserInfo());
         // Create new user's account
         User user = new User(signUpRequest.getUsername(),
@@ -107,7 +115,9 @@ public class AuthenticationController {
                 }
             });
         }
+
         user.setRoles(roles);
+        user.getUserInfo().setCart(cart);
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
